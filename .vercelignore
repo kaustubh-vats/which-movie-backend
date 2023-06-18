@@ -1,5 +1,4 @@
 # Ignore everything (folders and files) on root only
-/*
-!api/index.py
-!vercel.json
-!requirements.txt
+allmovies.csv
+finalDataSet.csv
+requirements.txt
