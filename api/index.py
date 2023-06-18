@@ -1,10 +1,10 @@
 from flask import Flask, request
-import pandas as pd
-import numpy as np
+from pandas import read_csv
+from numpy import nan
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from flask_cors import CORS
-import json
+from json import dumps
 
 app = Flask(__name__)
 
@@ -19,11 +19,11 @@ def index():
 def getAllMovies():
     if request.method == 'POST':
         try:
-            df = pd.read_csv('allmovies.csv')
+            df = read_csv('allmovies.csv')
             movie_list = df['Movie'].tolist()
             return {
                 'status': 'success',
-                'data': json.dumps(movie_list)
+                'data': dumps(movie_list)
             }
         except Exception as e:
             return {
@@ -41,12 +41,12 @@ def recommendMovie():
     if request.method == 'POST':
         try:
             movie = request.json['movie']
-            df = pd.read_csv('finalDataSet.csv')
-            features = ['genres', 'keywords', 'actor_1', 'actor_2', 'actor_3', 'director', 'original_language', 'tagline', 'original_title']
+            df = read_csv('finalDataSet.csv')
+            features = ['genresLs', 'keywords', 'actor_1', 'actor_2', 'actor_3', 'director', 'original_language', 'tagline', 'original_title']
             for feature in features:
                 df[feature] = df[feature].fillna('')
 
-            combined_features = df['genres'] + ' ' + df['keywords'] + ' ' + df['actor_1'] + ' ' + df['actor_2'] + ' ' + df['actor_3'] + ' ' + df['director'] + ' ' + df['original_language'] + ' ' + df['tagline'] + ' ' + df['original_title']
+            combined_features = df['genresLs'] + ' ' + df['keywords'] + ' ' + df['actor_1'] + ' ' + df['actor_2'] + ' ' + df['actor_3'] + ' ' + df['director'] + ' ' + df['original_language'] + ' ' + df['tagline'] + ' ' + df['original_title']
             
             cv = TfidfVectorizer()
             feature_vector = cv.fit_transform(combined_features)
@@ -67,6 +67,7 @@ def recommendMovie():
                 'data': movie_names
             }
         except Exception as e:
+            print(e)
             return {
                 'status': 'error',
                 'message': str(e)
@@ -82,10 +83,10 @@ def getMovieDetails():
     if request.method == 'POST':
         try:
             movie = request.json['movie']
-            df = pd.read_csv('finalDataSet.csv')
+            df = read_csv('finalDataSet.csv')
             movie_details = df[df['original_title'] == movie]
             # remove nan
-            movie_details = movie_details.replace(np.nan, '', regex=True)
+            movie_details = movie_details.replace(nan, '', regex=True)
             movie_details = movie_details.to_dict()
             return {
                 'status': 'success',
@@ -110,7 +111,7 @@ def getMovieRecommendationsByGenre():
             language = request.json['languages']
             minYear = request.json['minYear']
             maxYear = request.json['maxYear']
-            df = pd.read_csv('finalDataSet.csv')
+            df = read_csv('finalDataSet.csv')
             features = ['genresLs', 'original_language']
             for feature in features:
                 df[feature] = df[feature].fillna('')
